@@ -1,0 +1,16 @@
+syntax: glob
+
+hardware/datasheets/**
+hardware/research/**
+hardware/dist/**
+
+firmware/src/*.err
+firmware/src/*.obj
+firmware/src/build/**
+firmware/src/disassembly/**
+firmware/src/dist/**
+firmware/src/funclist
+firmware/src/nbproject/private/**
+firmware/src/nbproject/Makefile-genesis.properties
+firmware/src/nbproject/Makefile-*.mk
+firmware/src/nbproject/Package-*.bash
