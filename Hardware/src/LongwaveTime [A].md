@@ -1,16 +1,4 @@
-### LongwaveTime ###
-
-Board size: 105.8 x 26.0 mm ~ 4.3 sqin (0.8 mm thickness)
-Panel size: 29.5 x 20.3 mm ~ 1.0 sqin (2x)
-
-
-#### Input ####
-
-Voltage: 5 V ±10%
-Current: 100 mA
-
-
-#### Parts ####
+### Longwave Time Parts ###
 
 |  # | Part                                      | RefDes  | Preferred Part Number       |
 |---:|-------------------------------------------|---------|-----------------------------|
@@ -27,3 +15,11 @@ Current: 100 mA
 |  1 | U PIC16F1454-I/ST (SSOP-14)               | U1      | PIC16F1454-I/ST-ND          |
 |  1 | H Enclosure 1593DBK                       |         | HM861-ND                    |
 |  4 | H PCB Screw Self-tapping M3 6mm (#4 1/4") |         | 36-9191-3-ND                |
+
+
+#### Board Size ####
+
+|       |      Dimensions | Area    | Thickness |
+|-------|-----------------|---------|-----------|
+| PCB   | 105.8 x 26.0 mm | 4.3 in² |    0.8 mm | 
+| Panel |  29.5 x 20.3 mm | 1.0 in² |    1.6 mm |
