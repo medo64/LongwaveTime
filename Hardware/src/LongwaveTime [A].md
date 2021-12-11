@@ -10,8 +10,7 @@
 |  1 | J USB B, horizontal                       | J1      | ED2982-ND                   |
 |  1 | L Ferrite 40Ohm (0805)                    | L1      | 445-2201-1-ND               |
 |  3 | R 470 0.125W (0805)                       | R1-R3   | RMCF0805FT470RCT-ND         |
-|  3 | R 1K 0.125W (0805)                        | R4-R6   | RMCF0805FT1K00CT-ND         |
-|  1 | R 4.7K 0.125W (0805)                      | R7      | RMCF0805FT4K70CT-ND         |
+|  2 | R 4.7K 0.125W (0805)                      | R4-R5   | RMCF0805FT4K70CT-ND         |
 |  1 | U PIC16F1454-I/SL (SOIC-14)               | U1      | PIC16F1454T-I/SLCT-ND       |
 |  1 | H Enclosure 1593DBK                       |         | HM861-ND                    |
 |  4 | H PCB Screw Self-tapping M3 6mm (#4 1/4") |         | 36-9191-3-ND                |
