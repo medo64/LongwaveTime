@@ -117,7 +117,9 @@ void __interrupt() isr(void) {
 
         if (timerCounter100ms == 0) {  // 100 ms
             io_tick_toggle();  // toggle tick
-            if (radio_beat()) { io_led_pps_on(); } else { io_led_pps_off(); }  // do PPS and 
+            if (radio_beat()) { io_led_pps_on(); } else { io_led_pps_off(); }  // do PPS
+
+            // set output
             radio_output();
         }
         
@@ -150,6 +152,33 @@ bool processInput(const uint8_t* dataIn, const uint8_t count) {
                 }
             }
             usb_outputBufferAppend(radio_getProtocol());
+            return true;
+            
+        case 'S':
+            if ((count != 1) && (count != 3) && (count != 4)) { return false; }
+            if (count >= 3) {
+                if ((data[1] < '0') || (data[1] > '9')) { return false; }
+                if ((data[2] < '0') || (data[2] > '9')) { return false; }
+                if (count == 4 && ((data[3] < '0') || (data[3] > '9'))) { return false; }
+                uint8_t parsedSecond = (data[1] - 0x30) * 10 + (data[2] - 0x30);
+                if (parsedSecond > 60) { return false; }
+                uint8_t parsedTenth = (count == 4) ? (data[3] - 0x30) : 0;
+                radio_setTime(parsedSecond, parsedTenth);
+            }
+            if (radio_CurrentSecond == 0xFF) {  // just check second for invalid data
+                usb_outputBufferAppend('-');
+                usb_outputBufferAppend('-');
+                usb_outputBufferAppend('-');
+            } else {
+                usb_outputBufferAppend(0x30 + radio_CurrentSecond / 10);
+                usb_outputBufferAppend(0x30 + radio_CurrentSecond % 10);
+                usb_outputBufferAppend(0x30 + radio_CurrentTenth);
+            }
+            switch (radio_Buffer[radio_BufferIndex][0]) {
+                case 0: usb_outputBufferAppend('A'); break;
+                case 1: usb_outputBufferAppend('B'); break;
+                default: usb_outputBufferAppend('X'); break;
+            }
             return true;
 
         case 'V':  // Version
