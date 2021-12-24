@@ -1,5 +1,6 @@
 #pragma once
 
+
 #define _SETTINGS_FLASH_RAW {                                                                \
                               0,                                                             \
                               0,                                                             \

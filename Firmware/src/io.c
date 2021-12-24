@@ -3,6 +3,7 @@
 #include "io.h"
 #include "system.h"
 
+
 void io_init() {
     // Activity
     LATC2 = 1;   // default to off (inverse)
@@ -55,36 +56,50 @@ void io_led_activity_blink() {
 }
 
 
-void io_clock_setup60khz() {
-    PWM2CONbits.PWM2OE = 0; TRISCbits.TRISC3 = 1;      // 1: Disable the PWM0 pin output driver
-    PWM2CON = 0;                                       // 2: Clear the PWMxCON register
-    PR2 = 0b00110001;                                  // 3: Load the PR2 register with the PWM period value
-    PWM2DCH = 0; PWM2DCL = 0;                          // 4: Clear the PWMxDCH register and bits <7:6> of the PWMxDCL register
-    T2CON = 0b01011101;                                // 5: Configure and start Timer2 (1:12 postscaler)
-    PWM2CONbits.PWM2EN = 1; while (!PIR1bits.TMR2IF);  // 6: Enable PWM output pin and wait until Timer2 overflows; TMR2IF bit of the PIR1 register is set
-    PWM2CONbits.PWM2OE = 1; //(we'll clear tris later) // 7: Enable the PWMx pin output driver(s) by clearing the associated TRIS bit(s) and setting the PWMxOE bit of the PWMxCON register
-    PWM2DCH = 0x19;
+uint16_t io_clock_setup40khz() {
+    PWM2CONbits.PWM2OE = 0;               // 1: Disable the PWM0 pin output driver
+    PWM2CON = 0;                          // 2: Clear the PWMxCON register
+    PR2 = 0b01001010;                     // 3: Load the PR2 register with the PWM period value
+    PWM2DCH = 0; PWM2DCL = 0;             // 4: Clear the PWMxDCH register and bits <7:6> of the PWMxDCL register
+    T2CON = 0b01111101;                   // 5: Configure and start Timer2 (1:4 prescaler, 1:16 postscaler)
+    PWM2CONbits.PWM2EN = 1;               // 6: Enable PWM output pin
+    PWM2CONbits.PWM2OE = 1;               // 7: Enable the PWMx pin output driver
+    PWM2DCH = 37; PWM2DCL = 0b10000000;   // 4∗(PR2+1)∗DutyCycleRatio - 150
+    return 250;                           // 100/((1/40000)*16*1000)
 }
 
-void io_clock_setup75khz() {
-    PWM2CONbits.PWM2OE = 0; TRISCbits.TRISC3 = 1;      // 1: Disable the PWM0 pin output driver
-    PWM2CON = 0;                                       // 2: Clear the PWMxCON register
-    PR2 = 0b00100111;                                  // 3: Load the PR2 register with the PWM period value
-    PWM2DCH = 0; PWM2DCL = 0;                          // 4: Clear the PWMxDCH register and bits <7:6> of the PWMxDCL register
-    T2CON = 0b01110101;                                // 5: Configure and start Timer2 (1:15 postscaler)
-    PWM2CONbits.PWM2EN = 1; while (!PIR1bits.TMR2IF);  // 6: Enable PWM output pin and wait until Timer2 overflows; TMR2IF bit of the PIR1 register is set
-    PWM2CONbits.PWM2OE = 1; //(we'll clear tris later) // 7: Enable the PWMx pin output driver(s) by clearing the associated TRIS bit(s) and setting the PWMxOE bit of the PWMxCON register
-    PWM2DCH = 0x14;
+uint16_t io_clock_setup60khz() {
+    PWM2CONbits.PWM2OE = 0;               // 1: Disable the PWM0 pin output driver
+    PWM2CON = 0;                          // 2: Clear the PWMxCON register
+    PR2 = 0b11000111;                     // 3: Load the PR2 register with the PWM period value
+    PWM2DCH = 0; PWM2DCL = 0;             // 4: Clear the PWMxDCH register and bits <7:6> of the PWMxDCL register
+    T2CON = 0b01111100;                   // 5: Configure and start Timer2 (1:1 prescaler, 1:16 postscaler)
+    PWM2CONbits.PWM2EN = 1;               // 6: Enable PWM output pin
+    PWM2CONbits.PWM2OE = 1;               // 7: Enable the PWMx pin output driver
+    PWM2DCH = 100; PWM2DCL = 0b00000000;  // 4∗(PR2+1)∗DutyCycleRatio - 400
+    return 375;                           // 100/((1/60000)*16*1000)
+}
+
+uint16_t io_clock_setup77khz() {
+    PWM2CONbits.PWM2OE = 0;               // 1: Disable the PWM0 pin output driver
+    PWM2CON = 0;                          // 2: Clear the PWMxCON register
+    PR2 = 0b10011010;                     // 3: Load the PR2 register with the PWM period value
+    PWM2DCH = 0; PWM2DCL = 0;             // 4: Clear the PWMxDCH register and bits <7:6> of the PWMxDCL register
+    T2CON = 0b01101100;                   // 5: Configure and start Timer2 (1:1 prescaler, 1:14 postscaler)
+    PWM2CONbits.PWM2EN = 1;               // 6: Enable PWM output pin
+    PWM2CONbits.PWM2OE = 1;               // 7: Enable the PWMx pin output driver
+    PWM2DCH = 77; PWM2DCL = 0b10000000;   // 4∗(PR2+1)∗DutyCycleRatio - 310
+    return 553;                           // 100/((1/77419.35)*14*1000)
 }
 
 void io_clock_on() {
-    PIR1bits.TMR2IF = 0;   // reset interrupt flag
-    PIE1bits.TMR2IE = 1;   // enable interrupt
     INTCONbits.PEIE = 1;   // enable peripheral interrupts
     INTCONbits.GIE = 1;    // enable global interrupts
+    PIR1bits.TMR2IF = 0;   // reset interrupt flag
+    PIE1bits.TMR2IE = 1;   // enable interrupt
     TRISCbits.TRISC3 = 0;  // enable output
 }
 
 void io_clock_off() {
-    PIE1bits.TMR2IE = 0;  // disable interrupt
+    TRISCbits.TRISC3 = 1;  // disable output
 }

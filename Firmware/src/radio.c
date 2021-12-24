@@ -1,5 +1,28 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include "io.h"
+#include "radio.h"
+
+
+radio_protocol currentProtocol = '0';
+
+radio_protocol radio_getProtocol() {
+    return currentProtocol;
+}
+
+void radio_setProtocol(radio_protocol protocol) {
+    io_clock_off();
+
+    currentProtocol = protocol;
+    switch (protocol) {
+        case PROTOCOL_OFF:   radio_PostPostScale = 0; break;
+        case PROTOCOL_WWVB:  radio_PostPostScale = io_clock_setup60khz(); io_clock_on(); break;
+        case PROTOCOL_DCF77: radio_PostPostScale = io_clock_setup77khz(); io_clock_on(); break;
+        case PROTOCOL_MSF:   radio_PostPostScale = io_clock_setup40khz(); io_clock_on(); break;
+        case PROTOCOL_JJY40: radio_PostPostScale = io_clock_setup40khz(); io_clock_on(); break;
+        case PROTOCOL_JJY60: radio_PostPostScale = io_clock_setup60khz(); io_clock_on(); break;
+    }
+}
 
 
 uint8_t minuteDescriptionIndex = 0;  // which buffer to use

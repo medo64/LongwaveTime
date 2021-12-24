@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "system.h"
 
+
 void init(void) {
     interruptsDisable();
 
