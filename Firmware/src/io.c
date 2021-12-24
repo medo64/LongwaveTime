@@ -63,7 +63,7 @@ void io_clock_setup60khz() {
     T2CON = 0b01011101;                                // 5: Configure and start Timer2 (1:12 postscaler)
     PWM2CONbits.PWM2EN = 1; while (!PIR1bits.TMR2IF);  // 6: Enable PWM output pin and wait until Timer2 overflows; TMR2IF bit of the PIR1 register is set
     PWM2CONbits.PWM2OE = 1; //(we'll clear tris later) // 7: Enable the PWMx pin output driver(s) by clearing the associated TRIS bit(s) and setting the PWMxOE bit of the PWMxCON register
-    PWM2DCH = 0b00011000;
+    PWM2DCH = 0x19;
 }
 
 void io_clock_setup75khz() {
@@ -74,7 +74,7 @@ void io_clock_setup75khz() {
     T2CON = 0b01110101;                                // 5: Configure and start Timer2 (1:15 postscaler)
     PWM2CONbits.PWM2EN = 1; while (!PIR1bits.TMR2IF);  // 6: Enable PWM output pin and wait until Timer2 overflows; TMR2IF bit of the PIR1 register is set
     PWM2CONbits.PWM2OE = 1; //(we'll clear tris later) // 7: Enable the PWMx pin output driver(s) by clearing the associated TRIS bit(s) and setting the PWMxOE bit of the PWMxCON register
-    PWM2DCH = 0b00010011;
+    PWM2DCH = 0x14;
 }
 
 void io_clock_on() {
