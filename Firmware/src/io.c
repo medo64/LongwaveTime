@@ -1,4 +1,5 @@
 #include <xc.h>
+#include <stdint.h>
 #include "io.h"
 #include "system.h"
 
@@ -31,6 +32,28 @@ void io_splash() {
     io_led_pps_on(); io_led_activity_off(); wait_short();
     io_led_pps_off(); io_led_activity_on();
 }
+
+
+#define LED_ACTIVITY_TIMEOUT       2000
+#define LED_ACTIVITY_TIMEOUT_NONE  65535
+uint16_t LedAcivityTimeout = LED_ACTIVITY_TIMEOUT_NONE;
+
+void io_led_activity_tick() {
+    if (LedAcivityTimeout != LED_ACTIVITY_TIMEOUT_NONE) {
+        if (LedAcivityTimeout == 0) {
+            io_led_activity_on();
+            LedAcivityTimeout = LED_ACTIVITY_TIMEOUT_NONE;
+        } else {
+            LedAcivityTimeout--;
+        }
+    }
+}
+
+void io_led_activity_blink() {
+    io_led_activity_off();
+    LedAcivityTimeout = LED_ACTIVITY_TIMEOUT;
+}
+
 
 void io_clock_setup60khz() {
     PWM2CONbits.PWM2OE = 0; TRISCbits.TRISC3 = 1;      // 1: Disable the PWM0 pin output driver

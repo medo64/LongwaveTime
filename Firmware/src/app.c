@@ -8,10 +8,6 @@
 #include "system.h"
 #include "usb.h"
 
-#define LED_TIMEOUT       2000
-#define LED_TIMEOUT_NONE  65535
-uint16_t LedTimeout = LED_TIMEOUT_NONE;
-
 
 void main(void) {
     init();
@@ -28,14 +24,7 @@ void main(void) {
     io_clock_setup60khz(); io_clock_on();  //TEST
 
     while(true) {
-        if (LedTimeout != LED_TIMEOUT_NONE) {
-            if (LedTimeout == 0) {
-                io_led_activity_on();
-                LedTimeout = LED_TIMEOUT_NONE;
-            } else {
-                LedTimeout--;
-            }
-        }
+        io_led_activity_tick();
 
         USBDeviceTasks();
 
@@ -47,7 +36,7 @@ void main(void) {
         // USB receive
         uint8_t readCount = getsUSBUSART(UsbReadBuffer, USB_READ_BUFFER_MAX);  // until the buffer is free
         if (readCount > 0) {
-            io_led_activity_off(); LedTimeout = LED_TIMEOUT;
+            io_led_activity_blink();
             for (uint8_t i = 0; i < readCount; i++) {  // copy to buffer
                 uint8_t value = UsbReadBuffer[i];
                 if (UsbInputBufferCorrupted && ((value == 0x0A) || (value == 0x0D))) {
@@ -58,7 +47,6 @@ void main(void) {
                     UsbInputBufferCount++;
                 } else {
                     UsbInputBufferCorrupted = true;  // no more buffer; darn it
-                    LedTimeout = LED_TIMEOUT_NONE;  // turn off LED permanently
                 }
             }
         }
@@ -73,7 +61,7 @@ void main(void) {
 
         // USB send
         if ((UsbOutputBufferCount > 0) && USBUSARTIsTxTrfReady()) {  // send output if TX is ready
-            io_led_activity_off(); LedTimeout = LED_TIMEOUT;
+            io_led_activity_blink();
             uint8_t writeCount = 0;
             for (uint8_t i = 0; i < USB_WRITE_BUFFER_MAX; i++) {  // copy to output buffer
                 if (i < UsbOutputBufferCount) {

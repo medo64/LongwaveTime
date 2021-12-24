@@ -8,6 +8,9 @@ void io_splash();
 #define io_led_activity_on()      LATC2 = 0
 #define io_led_activity_toggle()  LATC2 = !LATC2
 
+void io_led_activity_tick();
+void io_led_activity_blink();
+
 #define io_led_pps_off()          LATA5 = 1
 #define io_led_pps_on()           LATA5 = 0
 #define io_led_pps_toggle()       LATA5 = !LATA5
