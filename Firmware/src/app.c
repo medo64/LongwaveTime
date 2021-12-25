@@ -138,7 +138,7 @@ bool processInput(const uint8_t* dataIn, const uint8_t count) {
     uint8_t* data = (uint8_t*)dataIn;
 
     switch (data[0]) {
-        case 'P':  // Protocol
+        case 'P': {  // Protocol
             if (count > 2) { return false; }
             if (count == 2) {  // set protocol
                 switch (data[1]) {
@@ -153,8 +153,47 @@ bool processInput(const uint8_t* dataIn, const uint8_t count) {
             }
             usb_outputBufferAppend(radio_getProtocol());
             return true;
-            
-        case 'S':
+        }
+
+        case 'R': {  // Raw data
+            //if ((count != 1) && (count != 60) && (count != 61) && (count != 62)) { return false; }
+            if (count > 1) {  // set buffer
+                uint8_t usedBufferIndex;
+                bool wasOk = radio_setBuffer(dataIn++, count - 1, &usedBufferIndex);
+                switch (usedBufferIndex) {
+                    case 0: usb_outputBufferAppend('X'); break;
+                    case 1: usb_outputBufferAppend('Y'); break;
+                    default: usb_outputBufferAppend('~'); break;
+                }
+                return wasOk;
+            } else {
+                uint8_t currBuffer = radio_BufferIndex;
+                uint8_t nextBuffer = (currBuffer + 1) & 0x01;
+                bool isCurrBufferOk = (radio_Buffer[currBuffer][0] != 0xFF);
+                bool isNextBufferOk = (radio_Buffer[nextBuffer][0] != 0xFF);
+                if (isCurrBufferOk) {
+                    switch (currBuffer) {
+                        case 0: usb_outputBufferAppend('X'); break;
+                        case 1: usb_outputBufferAppend('Y'); break;
+                        default: usb_outputBufferAppend('~'); break;
+                    }
+                } else {
+                    usb_outputBufferAppend('~');
+                }
+                if (isNextBufferOk) {
+                    switch (nextBuffer) {
+                        case 0: usb_outputBufferAppend('X'); break;
+                        case 1: usb_outputBufferAppend('Y'); break;
+                        default: usb_outputBufferAppend('~'); break;
+                    }
+                } else {
+                    usb_outputBufferAppend('~');
+                }
+                return true;
+            }
+        }
+
+        case 'S': {
             if ((count != 1) && (count != 3) && (count != 4)) { return false; }
             if (count >= 3) {
                 if ((data[1] < '0') || (data[1] > '9')) { return false; }
@@ -174,19 +213,27 @@ bool processInput(const uint8_t* dataIn, const uint8_t count) {
                 usb_outputBufferAppend(0x30 + radio_CurrentSecond % 10);
                 usb_outputBufferAppend(0x30 + radio_CurrentTenth);
             }
-            switch (radio_Buffer[radio_BufferIndex][0]) {
-                case 0: usb_outputBufferAppend('A'); break;
-                case 1: usb_outputBufferAppend('B'); break;
-                default: usb_outputBufferAppend('X'); break;
+            uint8_t currBuffer = radio_BufferIndex;
+            bool isCurrBufferOk = (radio_Buffer[currBuffer][0] != 0xFF);
+            if (isCurrBufferOk) {
+                switch (currBuffer) {
+                    case 0: usb_outputBufferAppend('X'); break;
+                    case 1: usb_outputBufferAppend('Y'); break;
+                    default: usb_outputBufferAppend('~'); break;
+                }
+            } else {
+                usb_outputBufferAppend('~');
             }
             return true;
+        }
 
-        case 'V':  // Version
+        case 'V': {  // Version
             if (count != 1) { return false; }
             for (uint8_t i = 0; i < sizeof(APP_VERSION); i++) {
                 usb_outputBufferAppend(APP_VERSION[i]);
             }
             return true;
+        }
 
         default: return false;
     }

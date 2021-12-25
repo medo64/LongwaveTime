@@ -27,7 +27,7 @@ SettingsRecord Settings;
 
 
 /** Initializes settings. */
-void settings_init();
+void settings_init(void);
 
 /** Saves settings to EEPROM. */
-void settings_save();
+void settings_save(void);

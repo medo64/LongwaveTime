@@ -5,7 +5,7 @@
 #include "Microchip/usb_device.h"
 
 
-void settings_init() {
+void settings_init(void) {
     uint8_t* settingsPtr = (uint8_t*)&Settings;
     for (uint8_t i = 0; i < sizeof(Settings); i++) {
         *settingsPtr = _SETTINGS_PROGRAM[i];
@@ -13,7 +13,7 @@ void settings_init() {
     }
 }
 
-void settings_save() {
+void settings_save(void) {
     bool hadInterruptsEnabled = (INTCONbits.GIE != 0);  // save if interrupts enabled
     INTCONbits.GIE = 0;  // disable interrupts
     PMCON1bits.WREN = 1;  // enable writes
