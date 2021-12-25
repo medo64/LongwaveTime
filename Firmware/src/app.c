@@ -157,40 +157,37 @@ bool processInput(const uint8_t* dataIn, const uint8_t count) {
 
         case 'R': {  // Raw data
             if ((count != 1) && (count != 60) && (count != 61) && (count != 62)) { return false; }
+            uint8_t currBuffer = radio_BufferIndex;
+            uint8_t nextBuffer = (currBuffer + 1) & 0x01;
             if (count > 1) {  // set buffer
-                uint8_t usedBufferIndex;
-                if (!radio_setBuffer(&data[1], count - 1, &usedBufferIndex)) { return false; }
-                switch (usedBufferIndex) {
+                if (!radio_setBuffer(nextBuffer, &data[1], count - 1)) { return false; }
+                if (currBuffer == 0xFF) {  // if buffer is invalid, apply immediately
+                    radio_BufferIndex = nextBuffer;
+                    currBuffer = nextBuffer;
+                    nextBuffer = (currBuffer + 1) & 0x01;
+                }
+            }
+            bool isCurrBufferOk = (currBuffer != 0xFF) && (radio_Buffer[currBuffer][0] != 0xFF);
+            bool isNextBufferOk = (radio_Buffer[nextBuffer][0] != 0xFF);
+            if (isCurrBufferOk) {
+                switch (currBuffer) {
                     case 0: usb_outputBufferAppend('X'); break;
                     case 1: usb_outputBufferAppend('Y'); break;
-                    default: usb_outputBufferAppend('~'); break;
+                    default: usb_outputBufferAppend('='); break;  // should never actually happen
                 }
-                return true;
             } else {
-                uint8_t currBuffer = radio_BufferIndex;
-                uint8_t nextBuffer = (currBuffer + 1) & 0x01;
-                bool isCurrBufferOk = (radio_Buffer[currBuffer][0] != 0xFF);
-                bool isNextBufferOk = (radio_Buffer[nextBuffer][0] != 0xFF);
-                if (isCurrBufferOk) {
-                    switch (currBuffer) {
-                        case 0: usb_outputBufferAppend('X'); break;
-                        case 1: usb_outputBufferAppend('Y'); break;
-                        default: usb_outputBufferAppend('~'); break;
-                    }
-                } else {
-                    usb_outputBufferAppend('~');
-                }
-                if (isNextBufferOk) {
-                    switch (nextBuffer) {
-                        case 0: usb_outputBufferAppend('X'); break;
-                        case 1: usb_outputBufferAppend('Y'); break;
-                        default: usb_outputBufferAppend('~'); break;
-                    }
-                } else {
-                    usb_outputBufferAppend('~');
-                }
-                return true;
+                usb_outputBufferAppend('~');
             }
+            if (isNextBufferOk) {
+                switch (nextBuffer) {
+                    case 0: usb_outputBufferAppend('X'); break;
+                    case 1: usb_outputBufferAppend('Y'); break;
+                    default: usb_outputBufferAppend('='); break;  // should never actually happen
+                }
+            } else {
+                usb_outputBufferAppend('~');
+            }
+            return true;
         }
 
         case 'S': {
@@ -198,7 +195,7 @@ bool processInput(const uint8_t* dataIn, const uint8_t count) {
             if (count >= 3) {
                 if ((data[1] < '0') || (data[1] > '9')) { return false; }
                 if ((data[2] < '0') || (data[2] > '9')) { return false; }
-                if (count == 4 && ((data[3] < '0') || (data[3] > '9'))) { return false; }
+                if ((count == 4) && ((data[3] < '0') || (data[3] > '9'))) { return false; }
                 uint8_t parsedSecond = (data[1] - 0x30) * 10 + (data[2] - 0x30);
                 if (parsedSecond > 60) { return false; }
                 uint8_t parsedTenth = (count == 4) ? (data[3] - 0x30) : 0;
@@ -212,17 +209,6 @@ bool processInput(const uint8_t* dataIn, const uint8_t count) {
                 usb_outputBufferAppend(0x30 + radio_CurrentSecond / 10);
                 usb_outputBufferAppend(0x30 + radio_CurrentSecond % 10);
                 usb_outputBufferAppend(0x30 + radio_CurrentTenth);
-            }
-            uint8_t currBuffer = radio_BufferIndex;
-            bool isCurrBufferOk = (radio_Buffer[currBuffer][0] != 0xFF);
-            if (isCurrBufferOk) {
-                switch (currBuffer) {
-                    case 0: usb_outputBufferAppend('X'); break;
-                    case 1: usb_outputBufferAppend('Y'); break;
-                    default: usb_outputBufferAppend('~'); break;
-                }
-            } else {
-                usb_outputBufferAppend('~');
             }
             return true;
         }

@@ -54,15 +54,16 @@ Sets bit data. Data is always set for the buffer not in use.
 
 Buffers are called X and Y.
 
-|          | Text                           | Notes                    |
-|----------|--------------------------------|--------------------------|
-| Syntax   | `R{59-61:data}<LF>`            |                          |
-| Response | `R{1:buffer}<CR><LF>`          | Buffer used for command  |
-| Reject   | `R!<BEL><CR><LF>`              |                          |
+|          | Text                           | Notes                                               |
+|----------|--------------------------------|-----------------------------------------------------|
+| Syntax   | `R{59-61:data}<LF>`            |                                                     |
+| Response | `R{2:buffer}<CR><LF>`          | Current buffer, followed by buffer user for command |
+| Reject   | `R!<BEL><CR><LF>`              |                                                     |
 
 If one sets 59 or 61 bit, leap second will be assumed.
 
 Bits sets using this command superseed data set by any other command.
+
 
 
 The following bits are supported for [WWVB](https://en.wikipedia.org/wiki/WWVB):
@@ -102,13 +103,13 @@ The following bits are supported for [JJY](https://en.wikipedia.org/wiki/JJY):
 
 Here are some usage examples:
 
-| Example            | Send               | Receive            | Notes                                                   |
-|--------------------|--------------------|--------------------|---------------------------------------------------------|
-| Query              | `R<LF>`            | `RYX<CR><LF>`      | Buffer Y is currently in use and X is ready             |
-| Query              | `R<LF>`            | `RY<CR><LF>`       | Buffer Y is currently in use and no new buffer is ready |
-| Set                | `R123...<LF>`      | `RY<CR><LF>`       | New data was written in buffer Y                        |
-| Not enough bits    | `R011<LF>`         | `R!<BEL><CR><LF>`  | Must have 59-61 bits (60 usually)                       |
-| Unknown protocol   | `Rx<LF>`           | `R!<BEL><CR><LF>`  |                                                         |
+| Example            | Send               | Receive            | Notes                                                            |
+|--------------------|--------------------|--------------------|------------------------------------------------------------------|
+| Query              | `R<LF>`            | `RYX<CR><LF>`      | Buffer Y is currently in use and X is ready                      |
+| Query              | `R<LF>`            | `RY~<CR><LF>`      | Buffer Y is currently in use and no new buffer is ready          |
+| Set                | `R123...<LF>`      | `R~X<CR><LF>`      | New data was written in buffer X and there was no current buffer |
+| Not enough bits    | `R011<LF>`         | `R!<BEL><CR><LF>`  | Must have 59-61 bits (60 usually)                                |
+| Unknown protocol   | `Rx<LF>`           | `R!<BEL><CR><LF>`  |                                                                  |
 
 
 #### Start (S) #####
@@ -120,26 +121,23 @@ always in tenths of second.
 Buffer is always switched either when `S` is called or when a full minute has
 elapsed.
 
-|          | Text                            |
-|----------|---------------------------------|
-| Syntax   | `S{2-3:second}{1:buffer}<LF>`   |
-| Response | `S{3:second}{1:buffer}<CR><LF>` |
-| Reject   | `S!<BEL><CR><LF>`               |
+|          | Text                           |
+|----------|--------------------------------|
+| Syntax   | `S{2-3:second}<LF>`            |
+| Response | `S{3:second}<CR><LF>`          |
+| Reject   | `S!<BEL><CR><LF>`              |
 
 Second can be any number from 00-60.
-
-Buffer is either `X`, `Y`, or `~` if no buffer is currently used (e.g. current
-expired and no new buffer has been provided).
 
 
 Here are some usage examples:
 
-| Example            | Send               | Receive            | Notes                                                           |
-|--------------------|--------------------|--------------------|-----------------------------------------------------------------|
-| Query              | `S<LF>`            | `S103X<CR><LF>`    | Returns current tenth of a second (10.2s) and buffer X is used  |
-| Query              | `S<LF>`            | `S---~<CR><LF>`    | Returning `-` when not active and `~` when no buffer is present |
-| Sync time          | `S42<LF>`          | `S420B<CR><LF>`    | Syncs device to second 42                                       |
-| Unknown second     | `S61<LF>`          | `S!<BEL><CR><LF>`  |                                                                 |
+| Example            | Send               | Receive            | Notes                                     |
+|--------------------|--------------------|--------------------|-------------------------------------------|
+| Query              | `S<LF>`            | `S103<CR><LF>`     | Returns current tenth of a second (10.2s) |
+| Query              | `S<LF>`            | `S---<CR><LF>`     | Returning `-` when not active             |
+| Sync time          | `S42<LF>`          | `S420<CR><LF>`     | Syncs device to second 42                 |
+| Unknown second     | `S61<LF>`          | `S!<BEL><CR><LF>`  |                                           |
 
 
 ##### Version (V) #####

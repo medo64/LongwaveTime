@@ -4,7 +4,7 @@
 #include "radio.h"
 
 
-const uint8_t RADIO_SIGNAL_DEFINITION_WWVB[5][10] = {  // https://en.wikipedia.org/wiki/WWVB
+const radio_signal_t RADIO_SIGNAL_DEFINITION_WWVB[5][10] = {  // https://en.wikipedia.org/wiki/WWVB
     SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
     SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
     SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
@@ -12,7 +12,7 @@ const uint8_t RADIO_SIGNAL_DEFINITION_WWVB[5][10] = {  // https://en.wikipedia.o
     SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_HIGH, SIGNAL_HIGH,
 };
 
-const uint8_t RADIO_SIGNAL_DEFINITION_DCF77[5][10] = {  // https://en.wikipedia.org/wiki/DCF77
+const radio_signal_t RADIO_SIGNAL_DEFINITION_DCF77[5][10] = {  // https://en.wikipedia.org/wiki/DCF77
     SIGNAL_LOW,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
     SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
     SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
@@ -20,7 +20,7 @@ const uint8_t RADIO_SIGNAL_DEFINITION_DCF77[5][10] = {  // https://en.wikipedia.
     SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
 };
 
-const uint8_t RADIO_SIGNAL_DEFINITION_MSF[5][10] = {  // https://en.wikipedia.org/wiki/Time_from_NPL_(MSF)
+const radio_signal_t RADIO_SIGNAL_DEFINITION_MSF[5][10] = {  // https://en.wikipedia.org/wiki/Time_from_NPL_(MSF)
     SIGNAL_OFF,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
     SIGNAL_OFF,  SIGNAL_HIGH, SIGNAL_OFF,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
     SIGNAL_OFF,  SIGNAL_OFF,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
@@ -28,7 +28,7 @@ const uint8_t RADIO_SIGNAL_DEFINITION_MSF[5][10] = {  // https://en.wikipedia.or
     SIGNAL_OFF,  SIGNAL_OFF,  SIGNAL_OFF,  SIGNAL_OFF,  SIGNAL_OFF,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
 };
 
-const uint8_t RADIO_SIGNAL_DEFINITION_JJY[5][10] = {  // https://en.wikipedia.org/wiki/JJY
+const radio_signal_t RADIO_SIGNAL_DEFINITION_JJY[5][10] = {  // https://en.wikipedia.org/wiki/JJY
     SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_LOW,  SIGNAL_LOW,
     SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,
     SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
@@ -36,7 +36,7 @@ const uint8_t RADIO_SIGNAL_DEFINITION_JJY[5][10] = {  // https://en.wikipedia.or
     SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,
 };
 
-uint8_t radio_SignalDefinition[5][10] = {
+radio_signal_t radio_SignalDefinition[5][10] = {
     SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
     SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
     SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
@@ -130,29 +130,25 @@ void radio_setTime(uint8_t second, uint8_t tenths) {
 }
 
 
-bool radio_setBuffer(const uint8_t* source, const uint8_t count, uint8_t* outUsedBuffer) {
-    uint8_t currBuffer = radio_BufferIndex;
-    uint8_t nextBuffer = (currBuffer + 1) & 0x01;
-    *outUsedBuffer = nextBuffer;
-
+bool radio_setBuffer(const uint8_t index, const uint8_t* source, const uint8_t count) {
     bool isOk = (count >= 59);
     for (unsigned i = 0; i < count; i++) {
         switch (*source) {
-            case 0x30: radio_Buffer[nextBuffer][i] = 0; break;
-            case 0x31: radio_Buffer[nextBuffer][i] = 1; break;
-            case 0x32: radio_Buffer[nextBuffer][i] = 2; break;
-            case 0x33: radio_Buffer[nextBuffer][i] = 3; break;
-            case 'M':  radio_Buffer[nextBuffer][i] = 4; break;
+            case 0x30: radio_Buffer[index][i] = 0; break;
+            case 0x31: radio_Buffer[index][i] = 1; break;
+            case 0x32: radio_Buffer[index][i] = 2; break;
+            case 0x33: radio_Buffer[index][i] = 3; break;
+            case 'M':  radio_Buffer[index][i] = 4; break;
             default:
-                radio_Buffer[nextBuffer][i] = 0xFF;
+                radio_Buffer[index][i] = 0xFF;
                 isOk = false;
                 break;
         }
         source++;
     }
 
-    if (count <= 60) { radio_Buffer[nextBuffer][60] = 0xFF; }
-    if (count <= 61) { radio_Buffer[nextBuffer][61] = 0xFF; }
+    if (count <= 60) { radio_Buffer[index][59] = 0xFF; }
+    if (count <= 61) { radio_Buffer[index][60] = 0xFF; }
 
     return isOk;
 }
@@ -167,7 +163,7 @@ bool radio_beat(void) {
             radio_CurrentSecond += 1;
 
             uint8_t currBuffer = radio_BufferIndex;
-            uint8_t lastSecond = radio_Buffer[currBuffer][60] == 0xFF ? 59 : 60;
+            uint8_t lastSecond = (radio_Buffer[currBuffer][60] == 0xFF) ? 59 : 60;
             if (radio_CurrentSecond > lastSecond) {
                 radio_setTime(0, 0);  // switch to next minute
             }
@@ -180,12 +176,14 @@ bool radio_beat(void) {
 
 bool radio_output(uint8_t second, uint8_t tenth) {
     uint8_t currBuffer = radio_BufferIndex;
-
-    radio_signal_t signal = SIGNAL_NA;
-    if (radio_Buffer[currBuffer][0] != 0xFF) {  // only go ahead if there is a buffer
-        uint8_t definitionIndex = radio_Buffer[currBuffer][second];
-        signal = radio_SignalDefinition[definitionIndex][tenth];
+    if ((currBuffer == 0xFF) || (radio_Buffer[currBuffer][0] != 0xFF)) { 
+        io_clock_disable();
+        io_attenuate_disable();
+        return false; 
     }
+
+    uint8_t definitionIndex = radio_Buffer[currBuffer][second];
+    radio_signal_t signal = radio_SignalDefinition[definitionIndex][tenth];
     switch (signal) {
         case SIGNAL_LOW:
             io_clock_enable();

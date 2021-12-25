@@ -27,7 +27,7 @@ uint8_t radio_CurrentSecond = 0xFF;                  // keeping time in tens, on
 uint8_t radio_CurrentTenth = 0xFF;
 void radio_setTime(uint8_t second, uint8_t tenths);  // sets time and switches buffer if ready
 
-uint8_t radio_BufferIndex = 1;     // buffer currently in use; start with 1 so that the next one is 0
+uint8_t radio_BufferIndex = 0xFF;     // buffer currently in use; start with 1 so that the next one is 0
 uint8_t radio_Buffer[2][61] = {    // describes each minute in 4 bits per second: 0b0000: 0; 0b0001: 1; 0b0010: 2; 0b0011: 3, 0b0100: M,
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF,  // 00-04
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF,  // 05-09
@@ -56,7 +56,7 @@ uint8_t radio_Buffer[2][61] = {    // describes each minute in 4 bits per second
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF,  // 55-59
     0xFF,                          // 60
 };
-bool radio_setBuffer(const uint8_t* source, const uint8_t count, uint8_t* outUsedBuffer);  // return which buffer was set
+bool radio_setBuffer(const uint8_t bufferIndex, const uint8_t* source, const uint8_t count);
 
 
 uint16_t radio_PostPostScale = 0;                 // scaling value to get 100 ms
