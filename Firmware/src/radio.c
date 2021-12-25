@@ -4,6 +4,46 @@
 #include "radio.h"
 
 
+const uint8_t RADIO_SIGNAL_DEFINITION_WWVB[5][10] = {  // https://en.wikipedia.org/wiki/WWVB
+    SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
+    SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
+    SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
+    SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
+    SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_HIGH, SIGNAL_HIGH,
+};
+
+const uint8_t RADIO_SIGNAL_DEFINITION_DCF77[5][10] = {  // https://en.wikipedia.org/wiki/DCF77
+    SIGNAL_LOW,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
+    SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
+    SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
+    SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
+    SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
+};
+
+const uint8_t RADIO_SIGNAL_DEFINITION_MSF[5][10] = {  // https://en.wikipedia.org/wiki/Time_from_NPL_(MSF)
+    SIGNAL_OFF,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
+    SIGNAL_OFF,  SIGNAL_HIGH, SIGNAL_OFF,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
+    SIGNAL_OFF,  SIGNAL_OFF,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
+    SIGNAL_OFF,  SIGNAL_OFF,  SIGNAL_OFF,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
+    SIGNAL_OFF,  SIGNAL_OFF,  SIGNAL_OFF,  SIGNAL_OFF,  SIGNAL_OFF,  SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH,
+};
+
+const uint8_t RADIO_SIGNAL_DEFINITION_JJY[5][10] = {  // https://en.wikipedia.org/wiki/JJY
+    SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_LOW,  SIGNAL_LOW,
+    SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,
+    SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
+    SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
+    SIGNAL_HIGH, SIGNAL_HIGH, SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,  SIGNAL_LOW,
+};
+
+uint8_t radio_SignalDefinition[5][10] = {
+    SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
+    SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
+    SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
+    SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
+    SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,   SIGNAL_NA,
+};
+
 radio_protocol_t currentProtocol = '0';
 
 radio_protocol_t radio_getProtocol(void) {
@@ -15,12 +55,64 @@ void radio_setProtocol(radio_protocol_t protocol) {
 
     currentProtocol = protocol;
     switch (protocol) {
-        case PROTOCOL_OFF:   radio_PostPostScale = 0; break;
-        case PROTOCOL_WWVB:  radio_PostPostScale = io_clock_setup60khz(); io_clock_on(); break;
-        case PROTOCOL_DCF77: radio_PostPostScale = io_clock_setup77khz(); io_clock_on(); break;
-        case PROTOCOL_MSF:   radio_PostPostScale = io_clock_setup40khz(); io_clock_on(); break;
-        case PROTOCOL_JJY40: radio_PostPostScale = io_clock_setup40khz(); io_clock_on(); break;
-        case PROTOCOL_JJY60: radio_PostPostScale = io_clock_setup60khz(); io_clock_on(); break;
+        case PROTOCOL_OFF:
+            for (unsigned i = 0; i < 5; i++) {
+                for (unsigned j = 0; j < 10; j++) {
+                    radio_SignalDefinition[i][j] = SIGNAL_NA;
+                }
+            }
+            radio_PostPostScale = 0;
+            break;
+
+        case PROTOCOL_WWVB:
+            for (unsigned i = 0; i < 5; i++) {
+                for (unsigned j = 0; j < 10; j++) {
+                    radio_SignalDefinition[i][j] = RADIO_SIGNAL_DEFINITION_WWVB[i][j];
+                }
+            }
+            radio_PostPostScale = io_clock_setup60khz();
+            io_clock_on();
+            break;
+
+        case PROTOCOL_DCF77:
+            for (unsigned i = 0; i < 5; i++) {
+                for (unsigned j = 0; j < 10; j++) {
+                    radio_SignalDefinition[i][j] = RADIO_SIGNAL_DEFINITION_DCF77[i][j];
+                }
+            }
+            radio_PostPostScale = io_clock_setup77khz();
+            io_clock_on();
+            break;
+
+        case PROTOCOL_MSF:
+            for (unsigned i = 0; i < 5; i++) {
+                for (unsigned j = 0; j < 10; j++) {
+                    radio_SignalDefinition[i][j] = RADIO_SIGNAL_DEFINITION_MSF[i][j];
+                }
+            }
+            radio_PostPostScale = io_clock_setup40khz();
+            io_clock_on();
+            break;
+
+        case PROTOCOL_JJY40:
+            for (unsigned i = 0; i < 5; i++) {
+                for (unsigned j = 0; j < 10; j++) {
+                    radio_SignalDefinition[i][j] = RADIO_SIGNAL_DEFINITION_JJY[i][j];
+                }
+            }
+            radio_PostPostScale = io_clock_setup40khz();
+            io_clock_on();
+            break;
+
+        case PROTOCOL_JJY60:
+            for (unsigned i = 0; i < 5; i++) {
+                for (unsigned j = 0; j < 10; j++) {
+                    radio_SignalDefinition[i][j] = RADIO_SIGNAL_DEFINITION_JJY[i][j];
+                }
+            }
+            radio_PostPostScale = io_clock_setup60khz();
+            io_clock_on();
+            break;
     }
 }
 
@@ -43,12 +135,26 @@ bool radio_setBuffer(const uint8_t* source, const uint8_t count, uint8_t* outUse
     uint8_t nextBuffer = (currBuffer + 1) & 0x01;
     *outUsedBuffer = nextBuffer;
 
-    radio_Buffer[nextBuffer][0] = 0;  // TODO; just for test
+    bool isOk = (count >= 59);
+    for (unsigned i = 0; i < count; i++) {
+        switch (*source) {
+            case 0x30: radio_Buffer[nextBuffer][i] = 0; break;
+            case 0x31: radio_Buffer[nextBuffer][i] = 1; break;
+            case 0x32: radio_Buffer[nextBuffer][i] = 2; break;
+            case 0x33: radio_Buffer[nextBuffer][i] = 3; break;
+            case 'M':  radio_Buffer[nextBuffer][i] = 4; break;
+            default:
+                radio_Buffer[nextBuffer][i] = 0xFF;
+                isOk = false;
+                break;
+        }
+        source++;
+    }
 
-    if (count <= 59) { radio_Buffer[nextBuffer][59] = 0xFF; }
     if (count <= 60) { radio_Buffer[nextBuffer][60] = 0xFF; }
+    if (count <= 61) { radio_Buffer[nextBuffer][61] = 0xFF; }
 
-    return true;
+    return isOk;
 }
 
 
@@ -71,5 +177,27 @@ bool radio_beat(void) {
     return (radio_CurrentTenth == 0);  // starting a new second
 }
 
-void radio_output(void) {
+
+bool radio_output(uint8_t second, uint8_t tenth) {
+    uint8_t currBuffer = radio_BufferIndex;
+
+    radio_signal_t signal = SIGNAL_NA;
+    if (radio_Buffer[currBuffer][0] != 0xFF) {  // only go ahead if there is a buffer
+        uint8_t definitionIndex = radio_Buffer[currBuffer][second];
+        signal = radio_SignalDefinition[definitionIndex][tenth];
+    }
+    switch (signal) {
+        case SIGNAL_LOW:
+            io_clock_enable();
+            io_attenuate_enable();
+            return true;
+        case SIGNAL_HIGH:
+            io_clock_enable();
+            io_attenuate_disable();
+            return true;
+        default:
+            io_clock_disable();
+            io_attenuate_disable();
+            return (signal == SIGNAL_OFF);  // false otherwise
+    }
 }

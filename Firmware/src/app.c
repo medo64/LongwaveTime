@@ -120,7 +120,7 @@ void __interrupt() isr(void) {
             if (radio_beat()) { io_led_pps_on(); } else { io_led_pps_off(); }  // do PPS
 
             // set output
-            radio_output();
+            radio_output(radio_CurrentSecond, radio_CurrentTenth);
         }
         
         // increase 100ms counter
@@ -156,16 +156,16 @@ bool processInput(const uint8_t* dataIn, const uint8_t count) {
         }
 
         case 'R': {  // Raw data
-            //if ((count != 1) && (count != 60) && (count != 61) && (count != 62)) { return false; }
+            if ((count != 1) && (count != 60) && (count != 61) && (count != 62)) { return false; }
             if (count > 1) {  // set buffer
                 uint8_t usedBufferIndex;
-                bool wasOk = radio_setBuffer(dataIn++, count - 1, &usedBufferIndex);
+                if (!radio_setBuffer(&data[1], count - 1, &usedBufferIndex)) { return false; }
                 switch (usedBufferIndex) {
                     case 0: usb_outputBufferAppend('X'); break;
                     case 1: usb_outputBufferAppend('Y'); break;
                     default: usb_outputBufferAppend('~'); break;
                 }
-                return wasOk;
+                return true;
             } else {
                 uint8_t currBuffer = radio_BufferIndex;
                 uint8_t nextBuffer = (currBuffer + 1) & 0x01;

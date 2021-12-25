@@ -25,6 +25,8 @@ uint16_t io_clock_setup60khz(void);
 uint16_t io_clock_setup77khz(void);
 void io_clock_on(void);
 void io_clock_off(void);
+#define io_clock_enable()         TRISC3 = 0
+#define io_clock_disable()        TRISC3 = 1
 
-#define io_attenuate_on()         TRISC4 = 0
-#define io_attenuate_off()        TRISC4 = 1
+#define io_attenuate_enable()     TRISC4 = 0
+#define io_attenuate_disable()    TRISC4 = 1

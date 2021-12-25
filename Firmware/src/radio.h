@@ -5,6 +5,7 @@
 
 typedef enum RADIO_SIGNAL {
     SIGNAL_OFF  = 0b00,
+    SIGNAL_NA   = 0b01,
     SIGNAL_LOW  = 0b10,
     SIGNAL_HIGH = 0b11,
 } radio_signal_t;
@@ -61,4 +62,5 @@ bool radio_setBuffer(const uint8_t* source, const uint8_t count, uint8_t* outUse
 uint16_t radio_PostPostScale = 0;                 // scaling value to get 100 ms
 bool radio_beat(void);                            // call every 100 ms; returns true once per seconds
 
-void radio_output(void);                          // call to set radio for current beat interval
+
+bool radio_output(uint8_t second, uint8_t tenth);  // call to set radio for current beat interval
