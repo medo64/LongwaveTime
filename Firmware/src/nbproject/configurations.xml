@@ -21,6 +21,7 @@
       <itemPath>io.h</itemPath>
       <itemPath>radio.h</itemPath>
       <itemPath>usb.h</itemPath>
+      <itemPath>app.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"

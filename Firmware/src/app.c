@@ -2,6 +2,7 @@
 #include "Microchip/usb.h"
 #include "Microchip/usb_device.h"
 #include "Microchip/usb_device_cdc.h"
+#include "app.h"
 #include "io.h"
 #include "radio.h"
 #include "settings.h"
@@ -12,7 +13,6 @@
 const uint8_t APP_VERSION[4] = { '2', '1', '1', '2' };
 
 bool processInput(const uint8_t* dataIn, const uint8_t count);
-bool testMode = false;
 
 
 void main(void) {
@@ -119,13 +119,14 @@ void __interrupt() isr(void) {
         if (timerCounter100ms == 0) {  // 100 ms
             io_tick_toggle();  // toggle tick
             if (radio_beat()) {  // do PPS
-                if (testMode) { io_led_pps_off(); } else { io_led_pps_on(); }
+                if (TestMode) { io_led_pps_off(); } else { io_led_pps_on(); }
+                if (TestModeOutput) { usb_outputBufferAppend(' '); }
             } else {
-                if (testMode) { io_led_pps_on(); } else { io_led_pps_off(); }
+                if (TestMode) { io_led_pps_on(); } else { io_led_pps_off(); }
             }
 
             // set output
-            if (!testMode) {
+            if (!TestMode || TestModeOutput) {
                 radio_output(radio_CurrentSecond, radio_CurrentTenth);
             }
         }
@@ -221,9 +222,9 @@ bool processInput(const uint8_t* dataIn, const uint8_t count) {
         }
 
         case 'T': {  // Test - T++ to enter
-            if (!testMode) {
+            if (!TestMode) {
                 if ((count == 3) && (data[1] == '*') && (data[2] == '*')) {
-                    testMode = true;
+                    TestMode = true;
                     return true;
                 }
                 return false;
@@ -244,6 +245,8 @@ bool processInput(const uint8_t* dataIn, const uint8_t count) {
 
                     case 'A': io_attenuate_enable();  break;
                     case 'a': io_attenuate_disable(); break;
+
+                    case 'O': TestModeOutput = true;  break;
 
                     case '-': reset(); break;
 

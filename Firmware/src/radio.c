@@ -1,7 +1,9 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include "app.h"
 #include "io.h"
 #include "radio.h"
+#include "usb.h"
 
 
 const radio_signal_t RADIO_SIGNAL_DEFINITION_WWVB[5][10] = {  // https://en.wikipedia.org/wiki/WWVB
@@ -175,7 +177,7 @@ bool radio_beat(void) {
 
 bool radio_output(uint8_t second, uint8_t tenth) {
     uint8_t currBuffer = radio_BufferIndex;
-    if ((currBuffer == 0xFF) || (radio_Buffer[currBuffer][0] != 0xFF)) { 
+    if ((currBuffer == 0xFF) || (radio_Buffer[currBuffer][0] == 0xFF)) {
         io_clock_disable();
         io_attenuate_disable();
         return false; 
@@ -184,18 +186,26 @@ bool radio_output(uint8_t second, uint8_t tenth) {
     uint8_t definitionIndex = radio_Buffer[currBuffer][second];
     radio_signal_t signal = radio_SignalDefinition[definitionIndex][tenth];
     switch (signal) {
+        case SIGNAL_OFF:
+            if (TestMode) { usb_outputBufferAppend('O'); }
+            io_clock_disable();
+            io_attenuate_enable();
+            return true;
         case SIGNAL_LOW:
+            if (TestMode) { usb_outputBufferAppend('L'); }
             io_clock_enable();
             io_attenuate_enable();
             return true;
         case SIGNAL_HIGH:
+            if (TestMode) { usb_outputBufferAppend('H'); }
             io_clock_enable();
             io_attenuate_disable();
             return true;
         default:
+            if (TestMode) { usb_outputBufferAppend('X'); }
             io_clock_disable();
             io_led_activity_off();
             io_attenuate_disable();
-            return (signal == SIGNAL_OFF);  // false otherwise
+            return false;
     }
 }

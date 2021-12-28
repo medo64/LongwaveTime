@@ -140,6 +140,36 @@ Here are some usage examples:
 | Unknown second     | `S61<LF>`          | `S!<BEL><CR><LF>`  |                                           |
 
 
+##### Test Mode (T) #####
+
+Testing. To enter into test mode use `T**<LF>`.
+
+|          | Text                                                            |
+|----------|-----------------------------------------------------------------|
+| Syntax   | `T<LF>`                                                         |
+| Response | `T{1:command}<CR><LF>`                                          |
+| Reject   | `T!<BEL><CR><LF>`                                               |
+
+Here are some usage examples:
+
+| Example             | Send               | Receive            | Notes                                     |
+|---------------------|--------------------|--------------------|-------------------------------------------|
+| Query               | `T<LF>`            | `TWCa<CR><LF>`     | WWVB with clock but no attenuation        |
+| No protocol         | `T0<LF>`           | `T0Ca<CR><LF>`     | No protocol with clock but no attenuation |
+| WWVB protocol       | `TW<LF>`           | `TWCa<CR><LF>`     | WWVB with clock but no attenuation        |
+| DCF77 protocol      | `TD<LF>`           | `TDCa<CR><LF>`     | DCF77 with clock but no attenuation       |
+| MSF protocol        | `TM<LF>`           | `TMCa<CR><LF>`     | MSF with clock but no attenuation         |
+| JJY40 protocol      | `T4<LF>`           | `T4Ca<CR><LF>`     | JJY40 with clock but no attenuation       |
+| JJY60 protocol      | `T6<LF>`           | `T6Ca<CR><LF>`     | JJY60 with clock but no attenuation       |
+| Enable clock        | `TC<LF>`           | `TWCa<CR><LF>`     | WWVB with clock but no attenuation        |
+| Disable clock       | `Tc<LF>`           | `TWca<CR><LF>`     | WWVB without clock and no attenuation     |
+| Enable attenuation  | `TA<LF>`           | `TWCA<CR><LF>`     | WWVB with clock and attenuation           |
+| Disable attenuation | `Ta<LF>`           | `TWca<CR><LF>`     | WWVB without clock and no attenuation     |
+| Output radio signal | `TO<LF>`           | `TWCa<CR><LF>`     | Outputs debug signal                      |
+| Reboot              | `T-<LF>`           | Nothing            | Reboots the device                        |
+| Unknown parameters  | `Tx<LF>`           | `T!<BEL><CR><LF>`  |                                           |
+
+
 ##### Version (V) #####
 
 Returns software version.
@@ -168,5 +198,5 @@ When starting up:
 
 For the every minute after startup:
   1) At second `59` set data for the next minute using `R` command
-  2) At second `0` apply new data using `S` command
+  2) At second `00` apply new data using `S` command
   3) Rinse & repeat
