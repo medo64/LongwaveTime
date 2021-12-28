@@ -32,7 +32,7 @@ void settings_save(void) {
 
     // write
     for (uint8_t i = 1; i <= sizeof(Settings); i++) {
-        unsigned latched = (i == sizeof(Settings)) ? 0 : 1;  // latch load is done for all except last
+        bool latched = (i == sizeof(Settings)) ? 0 : 1;  // latch load is done for all except last
         PMADR = address;            // set location
         PMDATH = 0x3F;              // same as when erased
         PMDATL = *settingsPtr;      // load data
