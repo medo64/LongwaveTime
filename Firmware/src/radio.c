@@ -51,8 +51,6 @@ radio_protocol_t radio_getProtocol(void) {
 }
 
 void radio_setProtocol(radio_protocol_t protocol) {
-    io_clock_off();
-
     currentProtocol = protocol;
     switch (protocol) {
         case PROTOCOL_OFF:
@@ -61,6 +59,7 @@ void radio_setProtocol(radio_protocol_t protocol) {
                     radio_SignalDefinition[i][j] = SIGNAL_NA;
                 }
             }
+            io_clock_off();
             radio_PostPostScale = 0;
             break;
 
@@ -195,6 +194,7 @@ bool radio_output(uint8_t second, uint8_t tenth) {
             return true;
         default:
             io_clock_disable();
+            io_led_activity_off();
             io_attenuate_disable();
             return (signal == SIGNAL_OFF);  // false otherwise
     }

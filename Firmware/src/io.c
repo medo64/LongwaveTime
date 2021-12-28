@@ -93,13 +93,15 @@ uint16_t io_clock_setup77khz(void) {
 }
 
 void io_clock_on(void) {
-    INTCONbits.PEIE = 1;   // enable peripheral interrupts
-    INTCONbits.GIE = 1;    // enable global interrupts
-    PIR1bits.TMR2IF = 0;   // reset interrupt flag
-    PIE1bits.TMR2IE = 1;   // enable interrupt
-    TRISCbits.TRISC3 = 0;  // enable output
+    INTCONbits.PEIE = 1;    // enable peripheral interrupts
+    INTCONbits.GIE = 1;     // enable global interrupts
+    PIR1bits.TMR2IF = 0;    // reset interrupt flag
+    PIE1bits.TMR2IE = 1;    // enable interrupt
+    PWM2CONbits.PWM2OE = 1; // enable PWM
+    TRISCbits.TRISC3 = 0;   // enable output
 }
 
 void io_clock_off(void) {
-    TRISCbits.TRISC3 = 1;  // disable output
+    PWM2CONbits.PWM2OE = 0; // enable PWM
+    TRISCbits.TRISC3 = 1;   // disable output
 }

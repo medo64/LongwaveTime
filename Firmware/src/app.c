@@ -12,6 +12,7 @@
 const uint8_t APP_VERSION[4] = { '2', '1', '1', '2' };
 
 bool processInput(const uint8_t* dataIn, const uint8_t count);
+bool testMode = false;
 
 
 void main(void) {
@@ -117,10 +118,16 @@ void __interrupt() isr(void) {
 
         if (timerCounter100ms == 0) {  // 100 ms
             io_tick_toggle();  // toggle tick
-            if (radio_beat()) { io_led_pps_on(); } else { io_led_pps_off(); }  // do PPS
+            if (radio_beat()) {  // do PPS
+                if (testMode) { io_led_pps_off(); } else { io_led_pps_on(); }
+            } else {
+                if (testMode) { io_led_pps_on(); } else { io_led_pps_off(); }
+            }
 
             // set output
-            radio_output(radio_CurrentSecond, radio_CurrentTenth);
+            if (!testMode) {
+                radio_output(radio_CurrentSecond, radio_CurrentTenth);
+            }
         }
         
         // increase 100ms counter
@@ -210,6 +217,42 @@ bool processInput(const uint8_t* dataIn, const uint8_t count) {
                 usb_outputBufferAppend(0x30 + radio_CurrentSecond % 10);
                 usb_outputBufferAppend(0x30 + radio_CurrentTenth);
             }
+            return true;
+        }
+
+        case 'T': {  // Test - T++ to enter
+            if (!testMode) {
+                if ((count == 3) && (data[1] == '*') && (data[2] == '*')) {
+                    testMode = true;
+                    return true;
+                }
+                return false;
+            }
+
+            if (count > 2) { return false; }
+            if (count == 2) {
+                switch (data[1]) {
+                    case '0': radio_setProtocol(PROTOCOL_OFF);   break;
+                    case 'W': radio_setProtocol(PROTOCOL_WWVB);  break;
+                    case 'D': radio_setProtocol(PROTOCOL_DCF77); break;
+                    case 'M': radio_setProtocol(PROTOCOL_MSF);   break;
+                    case '4': radio_setProtocol(PROTOCOL_JJY40); break;
+                    case '6': radio_setProtocol(PROTOCOL_JJY60); break;
+
+                    case 'C': io_clock_enable();  break;
+                    case 'c': io_clock_disable(); break;
+
+                    case 'A': io_attenuate_enable();  break;
+                    case 'a': io_attenuate_disable(); break;
+
+                    case '-': reset(); break;
+
+                    default: return false;
+                }
+            }
+            usb_outputBufferAppend(radio_getProtocol());
+            usb_outputBufferAppend(io_clock_isEnabled() ? 'C' : 'c' );
+            usb_outputBufferAppend(io_attenuate_isEnabled() ? 'A' : 'a' );
             return true;
         }
 
