@@ -53,6 +53,6 @@ func work() {
 }
 
 func getCurrentTime() time.Time {
-	var utcTime = time.Now().UTC()
+	var utcTime = getReferenceTime().UTC()
 	return time.Date(utcTime.Year(), utcTime.Month(), utcTime.Day(), utcTime.Hour(), utcTime.Minute(), utcTime.Second(), 0, time.UTC)
 }
