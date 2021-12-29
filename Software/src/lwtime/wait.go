@@ -32,5 +32,5 @@ func waitForAlmostNextMinute() {
 }
 
 func getReferenceTime() time.Time {
-	return time.Now().Add(+860 * time.Millisecond)
+	return time.Now().Add(+100 * time.Millisecond)
 }

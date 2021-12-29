@@ -55,8 +55,7 @@ func getAsWWWB(time time.Time) string { // https://en.wikipedia.org/wiki/WWVB
 
 	out += "M" // Marker
 
-	out += "0" // Unused
-	out += "0" // Unused
+	out += "00" // Unused
 
 	// Hours
 	var hour = time.Hour()
@@ -100,8 +99,7 @@ func getAsWWWB(time time.Time) string { // https://en.wikipedia.org/wiki/WWVB
 
 	out += "M" // Marker
 
-	out += "0" // Unused
-	out += "0" // Unused
+	out += "00" // Unused
 
 	// Day of year
 	var day = time.YearDay()
@@ -168,21 +166,15 @@ func getAsWWWB(time time.Time) string { // https://en.wikipedia.org/wiki/WWVB
 		out += "0"
 	}
 
-	out += "0" // Unused
-	out += "0" // Unused
+	out += "00" // Unused
 
 	// DUT1 sign (TODO)
-	out += "0"
-	out += "0"
-	out += "0"
+	out += "000"
 
 	out += "M" // Marker
 
 	// DUT1 value (TODO)
-	out += "0"
-	out += "0"
-	out += "0"
-	out += "0"
+	out += "0000"
 
 	out += "0" // Unused
 
@@ -241,7 +233,8 @@ func getAsWWWB(time time.Time) string { // https://en.wikipedia.org/wiki/WWVB
 	out += "0" // Unused
 
 	// Leap year indicator
-	if year%4 == 0 && year%100 != 0 || year%400 == 0 {
+	var fullYear = time.Year()
+	if (fullYear%4 == 0) && (fullYear%100 != 0) || (fullYear%400 == 0) {
 		out += "1"
 	} else {
 		out += "0"
