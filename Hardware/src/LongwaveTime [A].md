@@ -8,7 +8,6 @@
 |  1 | C 10uF X5R 16V (0805)                     | C4      | 1276-1096-1-ND              |
 |  2 | DS LED (0805)                             | DS1-DS2 | 475-1415-1-ND               |
 |  1 | J USB B, horizontal                       | J1      | ED2982-ND                   |
-|  1 | L Ferrite 40Ohm (0805)                    | L1      | 445-2201-1-ND               |
 |  3 | R 330 0.125W (0805)                       | R1-R3   | RMCF0805FT330RCT-ND         |
 |  2 | R 5.1K 0.125W (0805)                      | R4-R5   | RMCF0805FT5K10CT-ND         |
 |  1 | U PIC16F1454-I/SL (SOIC-14)               | U1      | PIC16F1454T-I/SLCT-ND       |
