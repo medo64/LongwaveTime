@@ -133,23 +133,24 @@ void radio_setTime(uint8_t second, uint8_t tenths) {
 
 bool radio_setBuffer(const uint8_t index, const uint8_t* source, const uint8_t count) {
     bool isOk = (count >= 59);
-    for (unsigned i = 0; i < count; i++) {
-        switch (*source) {
-            case 0x30: radio_Buffer[index][i] = 0; break;
-            case 0x31: radio_Buffer[index][i] = 1; break;
-            case 0x32: radio_Buffer[index][i] = 2; break;
-            case 0x33: radio_Buffer[index][i] = 3; break;
-            case 'M':  radio_Buffer[index][i] = 4; break;
-            default:
-                radio_Buffer[index][i] = 0xFF;
-                isOk = false;
-                break;
+    for (unsigned i = 0; i < 61; i++) {
+        if (i >= count) {
+            radio_Buffer[index][i] = 0xFF;
+        } else {
+            switch (*source) {
+                case 0x30: radio_Buffer[index][i] = 0; break;
+                case 0x31: radio_Buffer[index][i] = 1; break;
+                case 0x32: radio_Buffer[index][i] = 2; break;
+                case 0x33: radio_Buffer[index][i] = 3; break;
+                case 'M':  radio_Buffer[index][i] = 4; break;
+                default:
+                    radio_Buffer[index][i] = 0xFF;
+                    isOk = false;
+                    break;
+            }
+            source++;
         }
-        source++;
     }
-
-    if (count <= 60) { radio_Buffer[index][59] = 0xFF; }
-    if (count <= 61) { radio_Buffer[index][60] = 0xFF; }
 
     return isOk;
 }
