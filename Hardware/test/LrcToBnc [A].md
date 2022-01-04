@@ -12,4 +12,4 @@ as pairs 1-2 and 3-4.
 
 |       |      Dimensions | Area    | Thickness |
 |-------|-----------------|---------|-----------|
-| PCB   |  32.0 x 25.0 mm | 1.3 in² |    0.8 mm |
+| PCB   |  51.0 x 25.0 mm | 2.0 in² |    0.8 mm |

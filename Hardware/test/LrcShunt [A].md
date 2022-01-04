@@ -1,8 +1,8 @@
-### LRC Calibrate ###
+### LRC Shunt ###
 
 
 #### Board Size ####
 
 |       |      Dimensions | Area    | Thickness |
 |-------|-----------------|---------|-----------|
-| PCB   |  32.0 x 13.0 mm | 0.7 in² |    1.6 mm |
+| PCB   |  51.0 x 17.0 mm | 1.4 in² |    0.8 mm |
